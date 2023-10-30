@@ -233,9 +233,9 @@
     - docker.vars
   vars:
  
-   - app_url: "https://github.com/Akshay-Gk/flaskapp-test.git"
+   - app_url: "https://github.com/Rashek.R/flaskapp-test.git"
    - clone_dir: "/var/flaskapp/"
-   - image_name: "akshaygkrishnan/flask-ansible-app"
+   - image_name: "rashekr/flask-ansible-app"
  
  
   tasks:
