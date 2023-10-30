@@ -1,10 +1,13 @@
-# server-automation-using-git-docker-ansible
-Absible Playbook
+# Git-Docker-Ansible-test-build-server-automation
+
+# Absible Playbook
+
+########################################################################
+## Creating Infrastructure
 ########################################################################
 
-Creating Infrastructure
-########################################################################
 
+```
 ---
 - name: "creating infra using ansible"
   hosts: localhost
@@ -122,55 +125,58 @@ Creating Infrastructure
       tags:
         - infra
         - build
+ ```
+
+########################################################################
+## Dynamic inventory for Build
 ########################################################################
 
-Dynamic inventory for Build
-########################################################################
-
+ ```
 - name: "Creating dynamic inv-fetching details for build"
- hosts: localhost
- vars:
-   region: "ap-south-1"
-   access_key: "your_access_key"
-   secret_key: "your_secret_key"
-   project: "zomato"
-   env: "prod"
- tasks:
-   - name: "Getting Instance Details"
-     amazon.aws.ec2_instance_info:
-       access_key: "{{ access_key }}"
-       secret_key: "{{ secret_key }}"
-       region: "{{ region }}"
-       filters:
-         instance-state-name: ["running"]
-         "tag:Name": "{{ project }}-{{ env }}-build"
-         "tag:project": "{{ project }}"
-         "tag:env": "{{ env }}"
-     register: ec2_details
-
-     tags:
-       - infra
-       - build
-
-   - name: "Creating Dynamic Inventory for build"
-     add_host:
-       groups: "build"
-       name: "{{ item.private_ip_address }}"
-       ansible_ssh_user: "ec2-user"
-       ansible_ssh_host: "{{ item.private_ip_address }}"
-       ansible_ssh_port: "22"
-       ansible_ssh_private_key_file: "{{ project }}-{{ env }}.pem"
-       ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
-     with_items: "{{ ec2_details.instances }}"
-
-     tags:
-       - infra
-       - build
+  hosts: localhost
+  vars:
+    region: "ap-south-1"
+    access_key: "your_access_key"
+    secret_key: "your_secret_key"
+    project: "zomato"
+    env: "prod"
+  tasks:
+    - name: "Getting Instance Details"
+      amazon.aws.ec2_instance_info:
+        access_key: "{{ access_key }}"
+        secret_key: "{{ secret_key }}"
+        region: "{{ region }}"
+        filters:
+          instance-state-name: ["running"]
+          "tag:Name": "{{ project }}-{{ env }}-build"
+          "tag:project": "{{ project }}"
+          "tag:env": "{{ env }}"
+      register: ec2_details
+ 
+      tags:
+        - infra
+        - build
+ 
+    - name: "Creating Dynamic Inventory for build"
+      add_host:
+        groups: "build"
+        name: "{{ item.private_ip_address }}"
+        ansible_ssh_user: "ec2-user"
+        ansible_ssh_host: "{{ item.private_ip_address }}"
+        ansible_ssh_port: "22"
+        ansible_ssh_private_key_file: "{{ project }}-{{ env }}.pem"
+        ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+      with_items: "{{ ec2_details.instances }}"
+ 
+      tags:
+        - infra
+        - build
+ ```
+########################################################################
+## Dynamic inventory for Test
 ########################################################################
 
-Dynamic inventory for Test
-########################################################################
-
+``` 
 - name: "Creating dynamic inv-fetching details for test"
   hosts: localhost
   vars:
@@ -212,11 +218,13 @@ Dynamic inventory for Test
         - infra
         - test
 
+ ```
+
+########################################################################
+## Provisioning - Docker Build with Image
 ########################################################################
 
-Provisioning - Docker Build with Image
-########################################################################
-
+``` 
 - name: "Bulding Docker Image"
   become: true
   hosts: build
@@ -313,11 +321,13 @@ Provisioning - Docker Build with Image
       tags:
         - build
 
+```
+
+########################################################################
+## Provisioning - Test Server with Container
 ########################################################################
 
-Provisioning - Test Server with Container
-########################################################################
-
+``` 
 - name: "running image on test server"
   hosts: test
   become: true
@@ -383,11 +393,13 @@ Provisioning - Test Server with Container
       tags:
         - test
 
+```
+
+########################################################################
+## Deleting Infrastructure
 ########################################################################
 
-Deleting Infrastructure
-########################################################################
-
+```
 - name: "Deleting Infrastructure"
   hosts: localhost
   vars:
@@ -437,7 +449,12 @@ Deleting Infrastructure
       tags:
         - delete
 
-Dockerfile
+```
+
+
+# Dockerfile
+
+```
 FROM alpine:latest
  
 ENV FLASK_PORT 8080
@@ -467,3 +484,5 @@ EXPOSE  $FLASK_PORT
 ENTRYPOINT ["python3"]
  
 CMD ["app.py"]
+
+```
