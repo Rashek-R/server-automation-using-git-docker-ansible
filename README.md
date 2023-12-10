@@ -1,6 +1,6 @@
 # server-automation-using-git-docker-ansible
 
-## Absible Playbook
+## Ansible Playbook
 
 ------------------------------------------------------------------------
 ## Creating Infrastructure
